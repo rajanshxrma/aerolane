@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: aerolane
+  datasource:
+    url: jdbc:h2:mem:aerolane;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  thymeleaf:
+    cache: false
+
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: lax
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/aerolane}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER:aerolane}
+    password: ${DB_PASSWORD:aerolane}
+  thymeleaf:
+    cache: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: sso
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: ${KEYCLOAK_CLIENT_ID:aerolane-web}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:aerolane-local-secret}
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+            provider: keycloak
+        provider:
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/aerolane}
