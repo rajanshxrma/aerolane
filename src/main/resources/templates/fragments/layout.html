@@ -20,7 +20,7 @@
     <div class="nav-user">
         <span class="who" sec:authentication="name">user</span>
         <form th:action="@{/logout}" method="post" class="inline-form">
-            <button type="submit" class="btn btn-ghost">Sign out</button>
+            <button type="submit" id="logout" class="btn btn-ghost">Sign out</button>
         </form>
     </div>
 </nav>
