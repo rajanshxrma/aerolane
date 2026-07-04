@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aerolane-config
+  namespace: aerolane
+data:
+  SPRING_PROFILES_ACTIVE: postgres
+  DB_URL: jdbc:postgresql://aerolane-db:5432/aerolane
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aerolane
+  namespace: aerolane
+  labels:
+    app: aerolane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aerolane
+  template:
+    metadata:
+      labels:
+        app: aerolane
+    spec:
+      containers:
+        - name: aerolane
+          # Build locally first: docker build -t aerolane:0.1.0 .
+          # For kind: kind load docker-image aerolane:0.1.0
+          # For minikube: minikube image load aerolane:0.1.0
+          image: aerolane:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: aerolane-config
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: aerolane-db-credentials
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aerolane-db-credentials
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 45
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 250m
+              memory: 384Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aerolane
+  namespace: aerolane
+spec:
+  selector:
+    app: aerolane
+  ports:
+    - port: 80
+      targetPort: 8080
+  # Port-forward for local clusters:
+  # kubectl -n aerolane port-forward svc/aerolane 8080:80

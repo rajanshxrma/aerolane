@@ -1,0 +1,36 @@
+{
+  "realm": "aerolane",
+  "enabled": true,
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "aerolane-web",
+      "name": "aerolane web app",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "aerolane-local-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:8080/*"],
+      "webOrigins": ["http://localhost:8080"]
+    }
+  ],
+  "users": [
+    {
+      "username": "sso.officer",
+      "enabled": true,
+      "firstName": "Officer",
+      "lastName": "Reyes",
+      "email": "sso.officer@aerolane.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ssopass123",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

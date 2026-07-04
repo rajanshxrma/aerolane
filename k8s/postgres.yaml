@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aerolane-db-credentials
+  namespace: aerolane
+type: Opaque
+stringData:
+  # Demo credentials. In a real cluster this comes from a secret manager,
+  # never from a file in the repo.
+  POSTGRES_USER: aerolane
+  POSTGRES_PASSWORD: aerolane
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: aerolane-db-pvc
+  namespace: aerolane
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aerolane-db
+  namespace: aerolane
+  labels:
+    app: aerolane-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aerolane-db
+  template:
+    metadata:
+      labels:
+        app: aerolane-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: aerolane
+          envFrom:
+            - secretRef:
+                name: aerolane-db-credentials
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "aerolane", "-d", "aerolane"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: aerolane-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aerolane-db
+  namespace: aerolane
+spec:
+  selector:
+    app: aerolane-db
+  ports:
+    - port: 5432
+      targetPort: 5432

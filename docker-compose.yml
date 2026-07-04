@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: aerolane
+      POSTGRES_USER: aerolane
+      POSTGRES_PASSWORD: aerolane
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aerolane -d aerolane"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DB_URL: jdbc:postgresql://db:5432/aerolane
+      DB_USER: aerolane
+      DB_PASSWORD: aerolane
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Optional SSO demo. Start with: docker compose --profile sso up
+  # Then run the app on the host with the sso profile (see README) so the
+  # browser and the app agree on the Keycloak issuer URL.
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    profiles: ["sso"]
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+
+volumes:
+  pgdata:
