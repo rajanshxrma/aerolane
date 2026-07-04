@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="page">
+    <h1>Dashboard</h1>
+
+    <section class="cards" aria-label="Operations summary">
+        <div class="card">
+            <span class="card-number" th:text="${openLanes}">0</span>
+            <span class="card-label">Lanes open</span>
+        </div>
+        <div class="card">
+            <span class="card-number" th:text="${maintenanceLanes}">0</span>
+            <span class="card-label">In maintenance</span>
+        </div>
+        <div class="card">
+            <span class="card-number" th:text="${closedLanes}">0</span>
+            <span class="card-label">Lanes closed</span>
+        </div>
+        <div class="card">
+            <span class="card-number" th:text="${todayCount}">0</span>
+            <span class="card-label">Inspections today</span>
+        </div>
+        <div class="card card-alert">
+            <span class="card-number" th:text="${failedTotal}">0</span>
+            <span class="card-label">Total failed checks</span>
+        </div>
+    </section>
+
+    <section aria-label="Recent inspections">
+        <h2>Recent inspections</h2>
+        <table>
+            <thead>
+            <tr>
+                <th scope="col">When</th>
+                <th scope="col">Lane</th>
+                <th scope="col">Equipment</th>
+                <th scope="col">Result</th>
+                <th scope="col">By</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="i : ${recentInspections}">
+                <td th:text="${#temporals.format(i.createdAt, 'MMM d, HH:mm')}">-</td>
+                <td th:text="${i.lane.terminal + ' · ' + i.lane.name}">-</td>
+                <td th:text="${#strings.replace(i.equipment.name(), '_', ' ')}">-</td>
+                <td>
+                    <span th:class="${i.result.name() == 'PASS'} ? 'badge badge-pass' : 'badge badge-fail'"
+                          th:text="${i.result}">-</span>
+                </td>
+                <td th:text="${i.inspectedBy}">-</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentInspections)}">
+                <td colspan="5" class="muted">No inspections yet.</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

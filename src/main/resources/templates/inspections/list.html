@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Inspections')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="page">
+    <div class="page-head">
+        <h1>Inspections</h1>
+        <a sec:authorize="hasAnyRole('OFFICER','SUPERVISOR')" class="btn btn-primary"
+           th:href="@{/inspections/new}">Log inspection</a>
+    </div>
+
+    <div class="banner banner-ok" th:if="${flash}" th:text="${flash}" role="status"></div>
+
+    <div class="filters" aria-label="Filter inspections">
+        <a th:href="@{/inspections}"
+           th:class="${activeResult == null} ? 'chip chip-active' : 'chip'">All</a>
+        <a th:href="@{/inspections(result='PASS')}"
+           th:class="${activeResult != null and activeResult.name() == 'PASS'} ? 'chip chip-active' : 'chip'">Passed</a>
+        <a th:href="@{/inspections(result='FAIL')}"
+           th:class="${activeResult != null and activeResult.name() == 'FAIL'} ? 'chip chip-active' : 'chip'">Failed</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th scope="col">When</th>
+            <th scope="col">Lane</th>
+            <th scope="col">Equipment</th>
+            <th scope="col">Result</th>
+            <th scope="col">Notes</th>
+            <th scope="col">By</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="i : ${inspections}">
+            <td th:text="${#temporals.format(i.createdAt, 'MMM d, HH:mm')}">-</td>
+            <td th:text="${i.lane.terminal + ' · ' + i.lane.name}">-</td>
+            <td th:text="${#strings.replace(i.equipment.name(), '_', ' ')}">-</td>
+            <td>
+                <span th:class="${i.result.name() == 'PASS'} ? 'badge badge-pass' : 'badge badge-fail'"
+                      th:text="${i.result}">-</span>
+            </td>
+            <td class="notes" th:text="${i.notes} ?: '—'">-</td>
+            <td th:text="${i.inspectedBy}">-</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(inspections)}">
+            <td colspan="6" class="muted">Nothing matches this filter.</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

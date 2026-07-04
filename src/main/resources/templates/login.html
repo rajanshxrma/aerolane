@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in · aerolane</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body class="login-body">
+<main class="login-card">
+    <h1 class="brand-large">aerolane</h1>
+    <p class="muted">Screening lane &amp; equipment inspection tracker</p>
+
+    <div class="banner banner-error" th:if="${param.error}" role="alert">
+        Wrong username or password.
+    </div>
+    <div class="banner banner-ok" th:if="${param.loggedout}" role="status">
+        Signed out.
+    </div>
+    <div class="banner banner-warn" th:if="${param.expired}" role="status">
+        Session expired — sign in again.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+    </form>
+
+    <div th:if="${ssoEnabled}" class="sso-block">
+        <div class="divider"><span>or</span></div>
+        <a class="btn btn-outline btn-block" th:href="@{/oauth2/authorization/keycloak}">
+            Sign in with SSO (Keycloak)
+        </a>
+    </div>
+
+    <details class="demo-creds">
+        <summary>Demo accounts</summary>
+        <table aria-label="Demo account credentials">
+            <thead>
+            <tr><th scope="col">Role</th><th scope="col">Username</th><th scope="col">Password</th></tr>
+            </thead>
+            <tbody>
+            <tr><td>Officer</td><td>officer</td><td>officer123</td></tr>
+            <tr><td>Supervisor</td><td>supervisor</td><td>supervisor123</td></tr>
+            <tr><td>Auditor</td><td>auditor</td><td>auditor123</td></tr>
+            </tbody>
+        </table>
+    </details>
+</main>
+</body>
+</html>

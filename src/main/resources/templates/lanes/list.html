@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Lanes')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="page">
+    <h1>Screening lanes</h1>
+    <p class="muted" sec:authorize="hasRole('SUPERVISOR')">
+        You are a supervisor — you can change lane status inline.</p>
+
+    <div class="banner banner-ok" th:if="${flash}" th:text="${flash}" role="status"></div>
+
+    <table>
+        <thead>
+        <tr>
+            <th scope="col">Lane</th>
+            <th scope="col">Terminal</th>
+            <th scope="col">Status</th>
+            <th scope="col">Last updated</th>
+            <th scope="col" sec:authorize="hasRole('SUPERVISOR')">Manage</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="lane : ${lanes}">
+            <td th:text="${lane.name}">-</td>
+            <td th:text="${lane.terminal}">-</td>
+            <td>
+                <span th:class="'badge badge-' + ${#strings.toLowerCase(lane.status.name())}"
+                      th:text="${lane.status}">-</span>
+            </td>
+            <td th:text="${#temporals.format(lane.updatedAt, 'MMM d, HH:mm')}">-</td>
+            <td sec:authorize="hasRole('SUPERVISOR')">
+                <form th:action="@{/lanes/manage/{id}/status(id=${lane.id})}" method="post"
+                      class="inline-form">
+                    <label class="visually-hidden" th:for="'status-' + ${lane.id}">New status</label>
+                    <select th:id="'status-' + ${lane.id}" name="status">
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
+                                th:selected="${s == lane.status}"></option>
+                    </select>
+                    <button type="submit" class="btn btn-small">Update</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

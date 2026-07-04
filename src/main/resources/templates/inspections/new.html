@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Log inspection')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<main class="page page-narrow">
+    <h1>Log an inspection</h1>
+    <p class="muted">Record the outcome of an equipment check. Failed checks show up on the dashboard
+        and in auditor reports immediately.</p>
+
+    <form th:action="@{/inspections}" th:object="${form}" method="post" class="stacked-form">
+        <label for="laneId">Lane</label>
+        <select id="laneId" th:field="*{laneId}" required>
+            <option value="" disabled selected>Pick a lane…</option>
+            <option th:each="lane : ${lanes}" th:value="${lane.id}"
+                    th:text="${'Terminal ' + lane.terminal + ' — ' + lane.name}"></option>
+        </select>
+        <p class="field-error" th:if="${#fields.hasErrors('laneId')}" th:errors="*{laneId}"></p>
+
+        <label for="equipment">Equipment</label>
+        <select id="equipment" th:field="*{equipment}" required>
+            <option value="" disabled selected>Pick equipment…</option>
+            <option th:each="type : ${equipmentTypes}" th:value="${type}"
+                    th:text="${#strings.replace(type.name(), '_', ' ')}"></option>
+        </select>
+        <p class="field-error" th:if="${#fields.hasErrors('equipment')}" th:errors="*{equipment}"></p>
+
+        <fieldset>
+            <legend>Result</legend>
+            <div class="radio-row">
+                <label class="radio-label">
+                    <input type="radio" th:field="*{result}" value="PASS"> Pass
+                </label>
+                <label class="radio-label">
+                    <input type="radio" th:field="*{result}" value="FAIL"> Fail
+                </label>
+            </div>
+        </fieldset>
+        <p class="field-error" th:if="${#fields.hasErrors('result')}" th:errors="*{result}"></p>
+
+        <label for="notes">Notes <span class="muted">(required context for failures)</span></label>
+        <textarea id="notes" th:field="*{notes}" rows="4" maxlength="500"
+                  placeholder="Calibration readings, error codes, anything the next shift needs to know."></textarea>
+        <p class="field-error" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}"></p>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save inspection</button>
+            <a class="btn btn-ghost" th:href="@{/inspections}">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
