@@ -28,7 +28,9 @@ class SecurityFlowTest {
 
     @Test
     void anonymousBrowserRequestRedirectsToLogin() throws Exception {
-        mockMvc.perform(get("/"))
+        // a real browser sends Accept: text/html — that's what routes anonymous
+        // traffic to the login redirect instead of the API's 401 entry point
+        mockMvc.perform(get("/").accept(MediaType.TEXT_HTML))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("**/login"));
     }

@@ -45,7 +45,7 @@
         <p class="field-error" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}"></p>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Save inspection</button>
+            <button type="submit" id="save-inspection" class="btn btn-primary">Save inspection</button>
             <a class="btn btn-ghost" th:href="@{/inspections}">Cancel</a>
         </div>
     </form>
