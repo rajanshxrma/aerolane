@@ -1,6 +1,6 @@
 # aerolane API reference
 
-Base URL: `http://localhost:8080/api/v1`
+Base URL: `http://localhost:8090/api/v1`
 Auth: HTTP Basic on every request. Interactive version at `/swagger-ui.html`.
 
 Status code semantics used across the API:

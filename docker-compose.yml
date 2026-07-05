@@ -5,8 +5,10 @@ services:
       POSTGRES_DB: aerolane
       POSTGRES_USER: aerolane
       POSTGRES_PASSWORD: aerolane
+    # Host ports default away from the usual suspects (5432, 8080) so this
+    # stack coexists with whatever else is running. Override: DB_PORT / APP_PORT.
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,7 +20,7 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8090}:8080"
     environment:
       SPRING_PROFILES_ACTIVE: postgres
       DB_URL: jdbc:postgresql://db:5432/aerolane

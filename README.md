@@ -24,7 +24,7 @@ flowchart LR
 docker compose up --build
 ```
 
-Open http://localhost:8080 — that's it. Postgres and the app come up together, Flyway migrates the schema, demo data seeds itself.
+Open http://localhost:8090 — that's it. Postgres and the app come up together, Flyway migrates the schema, demo data seeds itself. (Host port defaults to 8090 to stay out of 8080's way — override with `APP_PORT=... docker compose up`.)
 
 | Role | Username | Password | Can do |
 |---|---|---|---|
@@ -40,7 +40,7 @@ The same app behaves differently per role, enforced in two layers: URL rules in 
 
 ## REST API
 
-Interactive docs at http://localhost:8080/swagger-ui.html once running. Auth is HTTP Basic per request.
+Interactive docs at http://localhost:8090/swagger-ui.html once running. Auth is HTTP Basic per request.
 
 | Method | Path | Who | What |
 |---|---|---|---|
@@ -53,8 +53,8 @@ Interactive docs at http://localhost:8080/swagger-ui.html once running. Auth is 
 | GET | `/api/v1/reports/summary` | auditor, supervisor | Totals, fail rate, failures by equipment |
 
 ```bash
-curl -u officer:officer123 http://localhost:8080/api/v1/lanes
-curl -u supervisor:supervisor123 -X PATCH http://localhost:8080/api/v1/lanes/1 \
+curl -u officer:officer123 http://localhost:8090/api/v1/lanes
+curl -u supervisor:supervisor123 -X PATCH http://localhost:8090/api/v1/lanes/1 \
   -H "Content-Type: application/json" -d '{"status":"CLOSED"}'
 ```
 
@@ -73,10 +73,10 @@ The `sso` profile adds OIDC login next to form login. Keycloak proves who you ar
 
 ```bash
 docker compose --profile sso up db keycloak   # Keycloak on :8180, realm auto-imported
-mvn spring-boot:run -Dspring-boot.run.profiles=sso
+mvn spring-boot:run -Dspring-boot.run.profiles=sso -Dspring-boot.run.arguments=--server.port=8090
 ```
 
-Then hit "Sign in with SSO" and use `sso.officer` / `ssopass123`. The app runs on the host for this demo so the browser and the app agree on the issuer URL (`localhost:8180`) — the classic OIDC-in-compose networking gotcha, documented here instead of hidden.
+Then hit "Sign in with SSO" on http://localhost:8090 and use `sso.officer` / `ssopass123`. The app runs on the host for this demo so the browser and the app agree on the issuer URL (`localhost:8180`) — the classic OIDC-in-compose networking gotcha, documented here instead of hidden.
 
 ## Database
 
@@ -98,7 +98,7 @@ This app is also the target of [checkride](https://github.com/rajanshxrma/checkr
 docker build -t aerolane:0.1.0 .
 kind load docker-image aerolane:0.1.0     # or: minikube image load aerolane:0.1.0
 kubectl apply -f k8s/
-kubectl -n aerolane port-forward svc/aerolane 8080:80
+kubectl -n aerolane port-forward svc/aerolane 8090:80
 ```
 
 Manifests cover namespace, Postgres with a PVC and secret-sourced credentials, and the app deployment with readiness/liveness probes against `/actuator/health`, resource requests/limits, and config split between ConfigMap and Secret.
